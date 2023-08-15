@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CRM Portal</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body onload="setCustomerId();">
+    <div style="background-color: black;">
+        <h1 style="color: white; margin-left: 45%;">Customer Form</h1>
+    </div>
+    <div class="form">
+        <input hidden type="number" id="id">
+
+        <label>First Name:</label>
+        <input type="text" id="firstName" />
+        <br />
+        <label>Last Name:</label>
+        <input type="text" id="lastName" />
+        <br />
+        <label>Email:</label>
+        <input type="email" id="email" />
+        <br />
+        <button class="button button4" onclick="saveCustomerInfo();">Save</button>
+    </div>
+</body>
+<script>
+    async function saveCustomerInfo() {
+        var fName = document.getElementById("firstName").value;
+        var lName = document.getElementById("lastName").value;
+        var email = document.getElementById("email").value;
+        var id = document.getElementById("id").value;
+
+        var url = 'http://localhost:3051/crm/save';
+        var json = {
+            firstName: fName,
+            lastName: lName,
+            email: email
+        }
+        console.log(id);
+        if (id != "") {
+            json.id = id;
+            url = 'http://localhost:3051/crm/update';
+        }
+        let response = await fetch(
+            url,
+            {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(json)
+            }
+        );
+        let data = await response.json();
+        if (response.status == 200) {
+            window.location.assign("../index.html");
+        }
+    }
+
+    function setCustomerId() {
+        console.log(window.location.search);
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('customerId')
+        console.log(id);
+        if (id != undefined) {
+            setCustomerDetails(id).then(() => { return; });
+        }
+
+    }
+
+
+    async function setCustomerDetails(id) {
+        let response = await fetch(
+            'http://localhost:3051/crm/customer/' + id,
+            {
+                method: 'GET'
+            }
+        );
+        let data = await response.json();
+        document.getElementById("firstName").value = data.firstName;
+        document.getElementById("lastName").value = data.lastName;
+        document.getElementById("email").value = data.email;
+        document.getElementById("id").value = data.id;
+    }
+</script>
+
+</html>

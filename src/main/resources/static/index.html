@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CRM Portal</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body onload="getAllCustomers();">
+    <div style="background-color: black;">
+        <h1 style="color: white; margin-left: 30%;">Customer Relationship Management</h1>
+    </div>
+    <div class="button-container">
+        <button class="button button1" onclick="window.location.assign('../customerForm.html')">Add New</button>
+    </div>
+    <div class="center" >
+        <table>
+            <thead>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th colspan="2">Action</th>
+            </thead>
+            <tbody id="inject">
+
+            </tbody>
+        </table>
+    </div>
+</body>
+<script>
+    function getAllCustomers() {
+        makeApiCall();
+    }
+
+    async function makeApiCall() {
+        let response = await fetch(
+            'http://localhost:3051/crm/all',
+            {
+                method: 'GET'
+            }
+        );
+        let data = await response.json();
+        data.forEach(element => {
+            showData(element);
+        });
+    }
+
+
+    function showData(item) {
+        var injectElement = document.getElementById("inject");
+
+        var updateBtn = '<button class="button button2" onclick="sendToCustomerForm(' + item.id + ')">Update</button>';
+        var deleteBtn = '<button class="button button3" onclick="deleteApiCall(' + item.id + ')">Delete</button>';
+        var thisRow = "<tr><td>" + item.id + "</td><td>" + item.firstName + "</td><td>" + item.lastName + "</td><td>" + item.email + "</td><td>" + updateBtn + "</td><td>" + deleteBtn + "</td></tr>"
+
+        injectElement.innerHTML = injectElement.innerHTML + thisRow;
+    }
+
+    async function deleteApiCall(id) {
+        let response = await fetch(
+            'http://localhost:3051/crm/delete/' + id,
+            {
+                method: 'DELETE'
+            }
+        );
+        if (response.status == 200) {
+            window.location.assign("../index.html")
+        }
+    }
+
+    function sendToCustomerForm(id) {
+        window.location.assign("../customerForm.html?customerId=" + id);
+    }
+</script>
+
+</html>
